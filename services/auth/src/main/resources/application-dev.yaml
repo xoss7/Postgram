@@ -1,8 +1,6 @@
 spring:
   application:
     name: auth
-  profiles:
-    active: dev
 
   jpa:
     hibernate:
@@ -14,8 +12,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/oidc
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER:social_user}
+    password: ${POSTGRES_PASSWORD:changeme_postgres}
     driver-class-name: org.postgresql.Driver
 
 server:
@@ -32,6 +30,6 @@ app:
       mobile: socialapp://callback
   security:
     admin:
-      username: ${ADMIN_USERNAME}
-      password: ${ADMIN_PASSWORD}
-      email: ${ADMIN_EMAIL}
+      username: ${ADMIN_USERNAME:admin}
+      password: ${ADMIN_PASSWORD:admin}
+      email: ${ADMIN_EMAIL:admin@example.com}
