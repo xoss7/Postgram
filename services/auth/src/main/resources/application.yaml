@@ -4,6 +4,18 @@ spring:
   profiles:
     active: dev
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+      properties:
+        enable.idempotence: true
+        spring.json.add.type.headers: false
+        spring.json.type.mapping: userRegisteredEvent:sn.edu.ept.postgram.shared.events.UserRegisteredEvent
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,7 +25,7 @@ spring:
       schema-locations: classpath:sql/oauth2-schema.sql
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/oidc
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -21,15 +33,11 @@ spring:
 server:
   port: 8081
 
-logging:
-  level:
-    org.springframework.security: TRACE
-
 app:
   oauth2:
     redirect-uri:
-      web: http://localhost:4200/oauth/callback
-      mobile: socialapp://callback
+      web: ${WEB_OIDC_REDIRECT_URI}
+      mobile: ${MOBILE_OIDC_REDIRECT_URI}
   security:
     admin:
       username: ${ADMIN_USERNAME}

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
@@ -53,8 +54,7 @@ public class AuthorizationServerConfig {
                             .oidc(Customizer.withDefaults());	// Enable OpenID Connect 1.0
                 })
                 .authorizeHttpRequests((authorize) ->
-                        authorize
-                                .anyRequest().authenticated()
+                        authorize.anyRequest().authenticated()
                 )
                 // Redirect to the login page when not authenticated from the
                 // authorization endpoint
