@@ -33,12 +33,16 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/account/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/error/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/auth/account/register"))
-                .formLogin(Customizer.withDefaults());
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                );
 
         return http.build();
     }
@@ -56,7 +60,7 @@ public class SecurityConfig {
                         .username(adminUsername)
                         .password(passwordEncoder().encode(adminPassword))
                         .email(adminEmail)
-                        .roles(List.of("ROLE_ADMIN", "ROLE_USER"))
+                        .roles(List.of("ADMIN", "USER"))
                         .build();
                 userRepository.save(admin);
             };
