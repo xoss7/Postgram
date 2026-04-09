@@ -33,12 +33,11 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/account/register").permitAll()
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/error/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/auth/account/register"))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/register"))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
