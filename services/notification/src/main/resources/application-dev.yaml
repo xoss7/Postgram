@@ -9,25 +9,24 @@ spring:
           issuer-uri: http://localhost:8081
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/notification_db
+    username: ${POSTGRES_USER:social_user}
+    password: ${POSTGRES_PASSWORD:changeme_postgres}
 
   jpa:
     hibernate:
       ddl-auto: update
 
   kafka:
-    bootstrap-servers: ${KAFKA_SERVERS}
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
     consumer:
       group-id: notification-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "sn.edu.ept.postgram.shared.events"
         spring.json.use.type.headers: false
-
 
 server:
   port: 8085
