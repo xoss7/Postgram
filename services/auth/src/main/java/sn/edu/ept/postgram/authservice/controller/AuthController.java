@@ -18,11 +18,4 @@ public class AuthController {
     public String login() {
         return "login";
     }
-
-    @PostMapping("/api/v1/auth/account/register")
-    @ResponseBody
-    public Map<String, String> register(@RequestBody RegistrationRequestDto request) {
-        userService.save(request);
-        return Map.of("message", "Account created successfully. Please log in.");
-    }
 }
