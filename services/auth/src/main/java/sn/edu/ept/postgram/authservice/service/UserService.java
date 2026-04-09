@@ -62,7 +62,7 @@ public class UserService {
                 .build();
 
         eventPublisher.publish(
-                KafkaTopics.USER_REGISTERED.getEvent(),
+                KafkaTopics.USER_REGISTERED,
                 newUser.getId().toString(),
                 event
         );
