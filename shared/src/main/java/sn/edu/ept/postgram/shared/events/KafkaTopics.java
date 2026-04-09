@@ -1,22 +1,14 @@
 package sn.edu.ept.postgram.shared.events;
 
-import lombok.Getter;
+public final class KafkaTopics {
 
-@Getter
-public enum KafkaTopics {
+    private KafkaTopics() {}
 
-    USER_REGISTERED("user-registered"),
-    POST_PUBLISHED("post-published"),
-    POST_LIKED("post-liked"),
-    POST_DELETED("post-deleted"),
-    COMMENT_ADDED("comment-added"),
-    USER_FOLLOWED("user-followed"),
-    USER_UNFOLLOWED("user-unfollowed");
-
-    private final String event;
-
-    KafkaTopics(String event) {
-        this.event = event;
-    }
-
+    public static final String USER_REGISTERED = "user-registered";
+    public static final String POST_PUBLISHED = "post-published";
+    public static final String POST_LIKED = "post-liked";
+    public static final String POST_DELETED = "post-deleted";
+    public static final String COMMENT_ADDED = "comment-added";
+    public static final String USER_FOLLOWED = "user-followed";
+    public static final String USER_UNFOLLOWED = "user-unfollowed";
 }
