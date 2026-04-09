@@ -23,9 +23,14 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import sn.edu.ept.postgram.authservice.entity.User;
+import sn.edu.ept.postgram.authservice.repository.UserRepository;
+import sn.edu.ept.postgram.authservice.service.UserService;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -41,6 +46,7 @@ public class AuthorizationServerConfig {
     private String mobileOauth2RedirectUri;
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserService userService;
 
     @Bean
     @Order(1)
@@ -66,6 +72,23 @@ public class AuthorizationServerConfig {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+        return context -> {
+
+            if ("access_token".equals(context.getTokenType().getValue())) {
+                String username = context.getPrincipal().getName();
+
+                User user = userService.findByUsername(username);
+
+                context.getClaims().claims(claims -> {
+                    claims.put("user_id", user.getId().toString());
+                    claims.put("roles", user.getRoles());
+                });
+            }
+        };
     }
 
     // persists clients in DB
