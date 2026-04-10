@@ -1,6 +1,6 @@
 spring:
   application:
-    name: notification
+    name: notification-service
 
   security:
     oauth2:
@@ -27,6 +27,12 @@ spring:
       properties:
         spring.json.trusted.packages: "sn.edu.ept.postgram.shared.events"
         spring.json.use.type.headers: false
+
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
 
 server:
   port: 8085

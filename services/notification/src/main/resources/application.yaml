@@ -1,6 +1,6 @@
 spring:
   application:
-    name: notification
+    name: notification-service
 
   security:
     oauth2:
@@ -29,5 +29,11 @@ spring:
         spring.json.use.type.headers: false
 
 
+
 server:
   port: 8085
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://${EUREKA_SERVER}:${EUREKA_PORT}/eureka/
