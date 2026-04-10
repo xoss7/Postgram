@@ -18,6 +18,7 @@
 
   <modules>
     <module>gateway</module>
+    <module>discovery</module>
     <module>services/auth</module>
     <module>services/content</module>
     <module>services/social</module>
