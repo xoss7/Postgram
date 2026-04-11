@@ -22,6 +22,18 @@ spring:
                 - Path=/api/v1/notifications/**
               filters:
                 - StripPrefix=2
+            - id: messaging-service
+              uri: lb://MESSAGING-SERVICE
+              predicates:
+                - Path=/api/v1/messages/**
+              filters:
+                - StripPrefix=2
+            - id: messaging-service-ws
+              uri: lb:ws://MESSAGING-SERVICE
+              predicates:
+                - Path=/ws/**
+              filters:
+                - StripPrefix=0
           default-filters:
             - TokenRelay
 
