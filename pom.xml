@@ -11,8 +11,10 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <java.version>21</java.version>
-    <spring-boot.version>4.0.5</spring-boot.version>
+    <java.version>17</java.version>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <spring-boot.version>3.4.1</spring-boot.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -21,11 +23,6 @@
     <module>discovery</module>
     <module>services/auth</module>
     <module>services/content</module>
-    <module>services/social</module>
-    <module>services/feed</module>
-    <module>services/notification</module>
-    <module>services/messaging</module>
-    <module>services/media</module>
     <module>shared</module>
   </modules>
 
