@@ -9,6 +9,7 @@ public final class KafkaTopics {
     public static final String POST_LIKED = "post-liked";
     public static final String POST_DELETED = "post-deleted";
     public static final String COMMENT_ADDED = "comment-added";
+    public static final String MESSAGE_SENT = "message-sent";
     public static final String USER_FOLLOWED = "user-followed";
     public static final String USER_UNFOLLOWED = "user-unfollowed";
 }
