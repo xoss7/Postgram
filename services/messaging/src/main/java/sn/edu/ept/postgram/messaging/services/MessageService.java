@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,8 @@ import sn.edu.ept.postgram.messaging.entity.Conversation;
 import sn.edu.ept.postgram.messaging.entity.Message;
 import sn.edu.ept.postgram.messaging.repository.ConversationRepository;
 import sn.edu.ept.postgram.messaging.repository.MessageRepository;
+import sn.edu.ept.postgram.shared.events.KafkaTopics;
+import sn.edu.ept.postgram.shared.events.MessageSentEvent;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +30,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendMessage(UUID senderId, String senderUsername, SendMessageRequest request) {
         Conversation conversation = findOrCreateConversation(senderId, request.receiverId());
@@ -48,6 +52,18 @@ public class MessageService {
                 request.receiverId().toString(),
                 "/queue/messages",
                 response
+        );
+
+        kafkaTemplate.send(
+                KafkaTopics.MESSAGE_SENT,
+                senderId.toString(),
+                new MessageSentEvent(
+                        message.getId(),
+                        conversation.getId(),
+                        senderId,
+                        senderUsername,
+                        request.receiverId()
+                )
         );
     }
 
