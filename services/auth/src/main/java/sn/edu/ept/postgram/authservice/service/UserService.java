@@ -53,13 +53,13 @@ public class UserService {
                 .build();
         User newUser = userRepository.save(user);
 
-        UserRegisteredEvent event = UserRegisteredEvent.builder()
-                .id(newUser.getId())
-                .username(newUser.getUsername())
-                .firstName(requestDto.firstName())
-                .lastName(requestDto.lastName())
-                .bio(requestDto.bio())
-                .build();
+        UserRegisteredEvent event = new UserRegisteredEvent(
+                newUser.getId(),
+                requestDto.firstName(),
+                requestDto.lastName(),
+                newUser.getUsername(),
+                requestDto.bio()
+        );
 
         eventPublisher.publish(
                 KafkaTopics.USER_REGISTERED,
