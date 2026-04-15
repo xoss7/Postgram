@@ -6,9 +6,9 @@ spring:
     name: social
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/follow
-    username: amnatah
-    password: 1234
+    url: jdbc:postgresql://localhost:5432/oidc
+    username: social_user
+    password: changeme_postgres
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -19,7 +19,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: 127.0.0.1:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
