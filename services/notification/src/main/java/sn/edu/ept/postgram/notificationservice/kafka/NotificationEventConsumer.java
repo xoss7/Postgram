@@ -7,10 +7,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import sn.edu.ept.postgram.notificationservice.model.NotificationType;
 import sn.edu.ept.postgram.notificationservice.service.NotificationService;
-import sn.edu.ept.postgram.shared.events.CommentAddedEvent;
-import sn.edu.ept.postgram.shared.events.KafkaTopics;
-import sn.edu.ept.postgram.shared.events.PostLikedEvent;
-import sn.edu.ept.postgram.shared.events.UserFollowedEvent;
+import sn.edu.ept.postgram.shared.events.*;
 
 @Component
 @RequiredArgsConstructor
@@ -52,6 +49,18 @@ public class NotificationEventConsumer {
                 event.followerUsername(),
                 NotificationType.USER_FOLLOWED,
                 null
+        );
+    }
+
+    @KafkaListener(topics = KafkaTopics.MESSAGE_SENT, groupId = "notification-group")
+    public void onMessageReceived(@Payload MessageSentEvent event) {
+        log.info("Received MessageSentEvent from: {}", event.senderUsername());
+        notificationService.createNotification(
+                event.receiverId(),
+                event.senderId(),
+                event.senderUsername(),
+                NotificationType.MESSAGE_RECEIVED,
+                event.conversationId()
         );
     }
 }
