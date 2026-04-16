@@ -22,6 +22,12 @@ spring:
                 - Path=/api/v1/notifications/**
               filters:
                 - StripPrefix=2
+            - id: notification-service-ws
+              uri: lb:ws://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/ws/notifications/**
+              filters:
+                - StripPrefix=0
             - id: messaging-service
               uri: lb://MESSAGING-SERVICE
               predicates:
