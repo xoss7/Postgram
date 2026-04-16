@@ -10,37 +10,32 @@ spring:
 
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      routes:
-        - id: notification-service
-          uri: lb://NOTIFICATION-SERVICE
-          predicates:
-            - Path=/api/v1/notifications/**
-          filters:
-            - StripPrefix=2
-        - id: messaging-service
-          uri: lb://MESSAGING-SERVICE
-          predicates:
-            - Path=/api/v1/messages/**
-          filters:
-            - StripPrefix=2
-        - id: messaging-service-ws
-          uri: lb:ws://MESSAGING-SERVICE
-          predicates:
-            - Path=/ws/**
-          filters:
-            - StripPrefix=0
-        - id: content-service
-          uri: lb://CONTENT-SERVICE
-          predicates:
-            - Path=/api/v1/content/**
-          filters:
-            - StripPrefix=2
-      default-filters:
-        - TokenRelay
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+          routes:
+            - id: notification-service
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/api/v1/notifications/**
+              filters:
+                - StripPrefix=2
+            - id: messaging-service
+              uri: lb://MESSAGING-SERVICE
+              predicates:
+                - Path=/api/v1/messages/**
+              filters:
+                - StripPrefix=2
+            - id: messaging-service-ws
+              uri: lb:ws://MESSAGING-SERVICE
+              predicates:
+                - Path=/ws/**
+              filters:
+                - StripPrefix=0
+          default-filters:
+            - TokenRelay
 
 eureka:
   client:
