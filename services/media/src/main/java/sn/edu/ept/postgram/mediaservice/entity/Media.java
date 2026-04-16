@@ -36,9 +36,6 @@ public class Media {
     @Column(nullable = false)
     private String filename;
 
-    @Column(nullable = false)
-    private String url;
-
     @Column(name = "content_type", nullable = false)
     private String contentType;
 
