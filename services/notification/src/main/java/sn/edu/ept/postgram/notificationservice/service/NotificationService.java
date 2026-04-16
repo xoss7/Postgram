@@ -4,8 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sn.edu.ept.postgram.notificationservice.dto.NotificationResponseDto;
 import sn.edu.ept.postgram.notificationservice.entity.Notification;
 import sn.edu.ept.postgram.notificationservice.model.NotificationType;
 import sn.edu.ept.postgram.notificationservice.repository.NotificationRepository;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Transactional
     public void createNotification(UUID recipientId, UUID actorId, String actorUsername,
@@ -34,6 +37,12 @@ public class NotificationService {
                 .refId(refId)
                 .build();
         notificationRepository.save(notification);
+
+        simpMessagingTemplate.convertAndSendToUser(
+                refId.toString(),
+                "/queue/notification",
+                NotificationResponseDto.from(notification)
+        );
     }
 
     @Transactional(readOnly = true)
