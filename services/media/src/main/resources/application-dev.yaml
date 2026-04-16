@@ -8,7 +8,7 @@ spring:
     password: changeme_postgres
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
   servlet:
     multipart:
       enabled: true

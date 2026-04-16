@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sn.edu.ept.postgram.mediaservice.dto.MediaFileResponseDto;
@@ -13,6 +15,7 @@ import sn.edu.ept.postgram.mediaservice.entity.Media;
 import sn.edu.ept.postgram.mediaservice.model.MediaType;
 import sn.edu.ept.postgram.mediaservice.repository.MediaRepository;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 @Slf4j
@@ -29,9 +32,6 @@ public class MediaService {
     @Value("${app.minio.buckets.posts}")
     private String postsBucket;
 
-    @Value("${app.minio.endpoint}")
-    private String minioEndpoint;
-
     @Value("${app.file-size.avatar}")
     private Long avatarSize;
 
@@ -44,7 +44,29 @@ public class MediaService {
         createBucketIfNotExists(postsBucket);
     }
 
-    public MediaFileResponseDto uploadAvatar(UUID uploaderId, MultipartFile file) {
+    public MediaFileResponseDto getMedia(UUID mediaId) {
+        Media media = mediaRepository.findById(mediaId)
+                .orElseThrow(() -> new RuntimeException("Media not found"));
+
+        try {
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(media.getBucket())
+                            .object(media.getFilename())
+                            .build()
+            );
+
+            byte[] bytes = stream.readAllBytes();
+            Resource resource = new ByteArrayResource(bytes);
+
+            return new MediaFileResponseDto(resource, media.getContentType(), media.getFilename());
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve file from MinIO", e);
+        }
+    }
+
+    public UUID uploadAvatar(UUID uploaderId, MultipartFile file) {
         validateImage(file);
 
         // delete former avater if exists
@@ -56,7 +78,7 @@ public class MediaService {
         return upload(uploaderId, file, MediaType.AVATAR, avatarsBucket);
     }
 
-    public MediaFileResponseDto uploadPostMedia(UUID uploaderId, MultipartFile file) {
+    public UUID uploadPostMedia(UUID uploaderId, MultipartFile file) {
         validateMedia(file);
         return upload(uploaderId, file, detectMediaType(file), postsBucket);
     }
@@ -73,8 +95,8 @@ public class MediaService {
         mediaRepository.delete(media);
     }
 
-    private MediaFileResponseDto upload(UUID uploaderId, MultipartFile file,
-                                        MediaType mediaType, String bucket) {
+    private UUID upload(UUID uploaderId, MultipartFile file,
+                                          MediaType mediaType, String bucket) {
         String filename = generateFilename(uploaderId, file);
 
         try {
@@ -90,19 +112,16 @@ public class MediaService {
             throw new RuntimeException("Failed to upload file to MinIO", e);
         }
 
-        String url = buildUrl(bucket, filename);
-
         Media media = Media.builder()
                 .uploaderId(uploaderId)
                 .type(mediaType)
                 .bucket(bucket)
                 .filename(filename)
-                .url(url)
                 .contentType(file.getContentType())
                 .size(file.getSize())
                 .build();
         mediaRepository.save(media);
-        return new MediaFileResponseDto(media.getId(), url, mediaType);
+        return media.getId();
     }
 
     private void deleteFromMinio(String bucket, String filename) {
@@ -135,10 +154,6 @@ public class MediaService {
     private String generateFilename(UUID uploaderId, MultipartFile file) {
         String extension = getExtension(file.getOriginalFilename());
         return uploaderId + "/" + UUID.randomUUID() + "." + extension;
-    }
-
-    private String buildUrl(String bucket, String filename) {
-        return minioEndpoint + "/" + bucket + "/" + filename;
     }
 
     private String getExtension(String filename) {

@@ -1,11 +1,9 @@
 package sn.edu.ept.postgram.mediaservice.dto;
 
-import sn.edu.ept.postgram.mediaservice.model.MediaType;
-
-import java.util.UUID;
+import org.springframework.core.io.Resource;
 
 public record MediaFileResponseDto(
-        UUID id,
-        String url,
-        MediaType type
+        Resource resource,
+        String contentType,
+        String filename
 ) {}
