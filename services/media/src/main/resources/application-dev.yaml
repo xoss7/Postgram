@@ -2,14 +2,10 @@ server:
   port: 8087
 
 spring:
-  profiles:
-    active: dev
-  application:
-    name: media-service
   datasource:
-    url: ${DB_URL}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/media_db
+    username: social_user
+    password: changeme_postgres
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,13 +20,17 @@ spring:
         jwt:
           issuer-uri: http://localhost:8081
 
-minio:
-  endpoint: ${MINIO_ENDPOINT}
-  access-key: ${MINIO_ROOT_USER}
-  secret-key: ${MINIO_ROOT_PASSWORD}
-  buckets:
-    avatars: avatars
-    posts: posts
+app:
+  minio:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: changeme_minio
+    buckets:
+      avatars: avatars
+      posts: posts
+  file-size:
+    avatar: 5242880 # 5MB
+    media: 52428800 # 50MB
 
 eureka:
   client:
