@@ -54,8 +54,9 @@ public class UserService {
         User newUser = userRepository.save(user);
 
         UserRegisteredEvent event = UserRegisteredEvent.builder()
-                .id(newUser.getId())
+                .userId(newUser.getId())
                 .username(newUser.getUsername())
+                .email(newUser.getEmail())
                 .firstName(requestDto.firstName())
                 .lastName(requestDto.lastName())
                 .bio(requestDto.bio())
