@@ -52,6 +52,12 @@ spring:
                 - Path=/api/v1/posts/**
               filters:
                 - StripPrefix=2
+            - id: social-service
+              uri: lb://SOCIAL-SERVICE
+              predicates:
+                - Path=/api/v1/profiles/**, /api/v1/follows/**
+              filters:
+                - StripPrefix=2
           default-filters:
             - TokenRelay
 
