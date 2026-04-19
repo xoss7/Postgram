@@ -1,10 +1,11 @@
-package sn.edu.ept.postgram.socialservice;
-
+package sn.edu.ept.postgram.socialservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -12,10 +13,12 @@ import java.util.UUID;
         uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "followee_id"}))
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Follow {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -26,13 +29,7 @@ public class Follow {
     @Column(name = "followee_id", nullable = false)
     private UUID followeeId;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = Instant.now();
-    }
-
+    @CreatedDate
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }
-

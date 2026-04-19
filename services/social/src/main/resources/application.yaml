@@ -1,19 +1,19 @@
 server:
-  port: 8083   # ou laisse vide si tu utilises config-server
+  port: 8083
 
 spring:
   application:
-    name: social
+    name: social-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/follow
-    username: amnatah
-    password: 1234
+    url: jdbc:postgresql://localhost:5432/social_db
+    username: social_user
+    password: changeme_postgres
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -23,9 +23,23 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.trusted.packages: "sn.edu.ept.postgram.shared.events"
+    consumer:
+      group-id: social-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "sn.edu.ept.postgram.shared.events"
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081
 
-#eureka:
-#  client:
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
