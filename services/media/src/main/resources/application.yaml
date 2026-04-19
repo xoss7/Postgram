@@ -1,3 +1,39 @@
+server:
+  port: 8087
+
 spring:
+  profiles:
+    active: dev
   application:
-    name: media
+    name: media-service
+  datasource:
+    url: ${DB_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081
+
+app:
+  minio:
+    endpoint: ${MINIO_ENDPOINT}
+    access-key: ${MINIO_ROOT_USER}
+    secret-key: ${MINIO_ROOT_PASSWORD}
+    buckets:
+      avatars: avatars
+      posts: posts
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
