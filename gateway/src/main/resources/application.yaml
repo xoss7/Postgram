@@ -46,6 +46,12 @@ spring:
                 - Path=/api/v1/media/**
               filters:
                 - StripPrefix=2
+            - id: content-service
+              uri: lb://CONTENT-SERVICE
+              predicates:
+                - Path=/api/v1/posts/**
+              filters:
+                - StripPrefix=2
           default-filters:
             - TokenRelay
 
