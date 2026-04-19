@@ -13,9 +13,7 @@ spring:
       acks: all
       properties:
         enable.idempotence: true
-        spring.json.add.type.headers: false
-        spring.json.type.mapping: userRegisteredEvent:sn.edu.ept.postgram.shared.events.UserRegisteredEvent
-
+        spring.json.add.type.headers: true
   jpa:
     hibernate:
       ddl-auto: update
