@@ -6,8 +6,9 @@ import java.util.UUID;
 
 @Builder
 public record UserRegisteredEvent(
-        UUID id,
+        UUID userId,
         String firstName,
         String lastName,
         String username,
+        String email,
         String bio){}
