@@ -1,3 +1,36 @@
+server:
+  port: 8089
+
 spring:
   application:
-    name: content
+    name: content-service
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/postgram_content
+    username: ibou
+    password: iboudia
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
