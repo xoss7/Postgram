@@ -58,6 +58,12 @@ spring:
                 - Path=/api/v1/profiles/**, /api/v1/follows/**
               filters:
                 - StripPrefix=2
+            - id: feed-service
+              uri: lb://FEED-SERVICE
+              predicates:
+                - Path=/api/v1/feed/**
+              filters:
+                - StripPrefix=2
           default-filters:
             - TokenRelay
 
