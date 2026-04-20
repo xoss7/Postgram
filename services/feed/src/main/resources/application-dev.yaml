@@ -4,15 +4,13 @@ server:
 spring:
   application:
     name: feed-service
-  profiles:
-    default: dev
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+      host: localhost
+      port: 6379
+      password: changeme_redis
   kafka:
-    bootstrap-servers: ${KAFKA_CLUSTER}
+    bootstrap-servers: localhost:9092
     consumer:
       group-id: feed-group
       auto-offset-reset: earliest
@@ -24,17 +22,13 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${AUTH_SERVER}
+          issuer-uri: http://localhost:8081
 
 feed:
-  max-size: 500           # nombre max de posts dans un feed Redis
+  max-size: 500
   default-page-size: 20
-
-services:
-  social-service: http://localhost:8083
-  content-service: http://localhost:8082
 
 eureka:
   client:
     service-url:
-      defaultZone: http://${EUREKA_SERVER}:${EUREKA_PORT}/eureka/
+      defaultZone: http://localhost:8761/eureka/
