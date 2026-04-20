@@ -2,32 +2,30 @@ server:
   port: 8082
 
 spring:
-  application:
-    name: content-service
-  profiles:
-    active: dev
   datasource:
-    url: ${DB_URL}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/content_db
+    username: social_user
+    password: changeme_postgres
   jpa:
     hibernate:
       ddl-auto: create
   kafka:
-    bootstrap-servers: ${KAFKA_CLUSTER}
+    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${AUTH_SERVICE}
+          issuer-uri: http://localhost:8081
 
 media:
-  path: ${MEDIA_PATH}
+  path: /api/v1/media
 
 eureka:
   client:
     service-url:
-      defaultZone: http://${EUREKA_SERVER}:${EUREKA_PORT}/eureka/
+      defaultZone: http://localhost:8761/eureka/

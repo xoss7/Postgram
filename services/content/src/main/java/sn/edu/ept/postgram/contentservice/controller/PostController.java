@@ -2,51 +2,72 @@ package sn.edu.ept.postgram.contentservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import sn.edu.ept.postgram.contentservice.dto.PostRequestDto;
-import sn.edu.ept.postgram.contentservice.dto.PostResponseDto;
+import sn.edu.ept.postgram.contentservice.dto.CreatePostRequest;
+import sn.edu.ept.postgram.contentservice.dto.PostResponse;
+import sn.edu.ept.postgram.contentservice.dto.UpdatePostRequest;
 import sn.edu.ept.postgram.contentservice.service.PostService;
+import sn.edu.ept.postgram.contentservice.utils.CurrentUserClaims;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/posts")
 @RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
 
-    @GetMapping("/health")
-    public String health() {
-        return "Content Service is up!";
-    }
-
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PostResponseDto createPost(@Valid @RequestBody PostRequestDto requestDto) {
-        return postService.createPost(requestDto);
+    public ResponseEntity<PostResponse> createPost(
+            @RequestBody @Valid CreatePostRequest request) {
+        UUID userId = CurrentUserClaims.userId();
+        String username = CurrentUserClaims.username();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(postService.createPost(userId, username, request));
     }
 
-    @GetMapping("/{id}")
-    public PostResponseDto getPost(@PathVariable UUID id) {
-        return postService.getPost(id);
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostResponse> getPost(@PathVariable UUID postId) {
+        return ResponseEntity.ok(postService.getPost(postId));
     }
 
-    @GetMapping
-    public List<PostResponseDto> getAllPosts() {
-        return postService.getAllPosts();
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<PostResponse>> getUserPosts(
+            @PathVariable UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(
+                postService.getUserPosts(userId, PageRequest.of(page, size))
+        );
     }
 
-    @PutMapping("/{id}")
-    public PostResponseDto updatePost(@PathVariable UUID id, @Valid @RequestBody PostRequestDto requestDto) {
-        return postService.updatePost(id, requestDto);
+    @GetMapping("/batch")
+    public ResponseEntity<List<PostResponse>> getPostsByIds(
+            @RequestParam List<UUID> ids) {
+        return ResponseEntity.ok(postService.getPostsByIds(ids));
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePost(@PathVariable UUID id) {
-        postService.deletePost(id);
+    @PatchMapping("/{postId}")
+    public ResponseEntity<PostResponse> updatePost(
+            @PathVariable UUID postId,
+            @RequestBody UpdatePostRequest request) {
+        UUID userId = CurrentUserClaims.userId();
+        return ResponseEntity.ok(postService.updatePost(postId, userId, request));
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(
+            @PathVariable UUID postId) {
+        UUID userId = CurrentUserClaims.userId();
+        postService.deletePost(postId, userId);
+        return ResponseEntity.noContent().build();
     }
 }
