@@ -23,7 +23,7 @@ public class FollowController {
     @PostMapping("/{followeeId}")
     public ResponseEntity<Void> follow(@PathVariable UUID followeeId,
                                        @AuthenticationPrincipal Jwt jwt) {
-        UUID followerId = UUID.fromString(jwt.getSubject());
+        UUID followerId = UUID.fromString(jwt.getClaim("user_id"));
         followService.follow(followerId, followeeId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -31,7 +31,7 @@ public class FollowController {
     @DeleteMapping("/{followeeId}")
     public ResponseEntity<Void> unfollow(@PathVariable UUID followeeId,
                                          @AuthenticationPrincipal Jwt jwt) {
-        UUID followerId = UUID.fromString(jwt.getSubject());
+        UUID followerId = UUID.fromString(jwt.getClaim("user_id"));
         followService.unfollow(followerId, followeeId);
         return ResponseEntity.noContent().build();
     }
@@ -55,7 +55,7 @@ public class FollowController {
     public ResponseEntity<Map<String, Boolean>> isFollowing(
             @PathVariable UUID followeeId,
             @AuthenticationPrincipal Jwt jwt) {
-        UUID followerId = UUID.fromString(jwt.getSubject());
+        UUID followerId = UUID.fromString(jwt.getClaim("user_id"));
         return ResponseEntity.ok(
                 Map.of("following", followService.isFollowing(followerId, followeeId))
         );
