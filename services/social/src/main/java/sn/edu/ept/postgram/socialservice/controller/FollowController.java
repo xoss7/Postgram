@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import sn.edu.ept.postgram.socialservice.dto.FollowStatsResponse;
 import sn.edu.ept.postgram.socialservice.service.FollowService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,6 +34,16 @@ public class FollowController {
         UUID followerId = UUID.fromString(jwt.getSubject());
         followService.unfollow(followerId, followeeId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{userId}/followers")
+    public ResponseEntity<List<UUID>> getFollowers(@PathVariable UUID userId) {
+        return ResponseEntity.ok(followService.getFollowerIds(userId));
+    }
+
+    @GetMapping("/{userId}/followees")
+    public ResponseEntity<List<UUID>> getFollowees(@PathVariable UUID userId) {
+        return ResponseEntity.ok(followService.getFolloweeIds(userId));
     }
 
     @GetMapping("/{userId}/stats")
