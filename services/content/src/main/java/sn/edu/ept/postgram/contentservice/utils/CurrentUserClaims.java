@@ -1,4 +1,4 @@
-package sn.edu.ept.postgram.contentservice.service;
+package sn.edu.ept.postgram.contentservice.utils;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -29,7 +29,7 @@ public final class CurrentUserClaims {
 
     public static String username() {
         Jwt jwt = currentJwt();
-        String username = jwt.getClaimAsString("preferred_username");
+        String username = jwt.getSubject();
         if (username == null || username.isBlank()) {
             username = jwt.getSubject();
         }

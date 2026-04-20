@@ -1,13 +1,13 @@
 package sn.edu.ept.postgram.contentservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import sn.edu.ept.postgram.contentservice.config.EventPublisher;
-import sn.edu.ept.postgram.contentservice.dto.CommentRequestDto;
-import sn.edu.ept.postgram.contentservice.dto.CommentResponseDto;
+import sn.edu.ept.postgram.contentservice.dto.CommentResponse;
+import sn.edu.ept.postgram.contentservice.dto.CreateCommentRequest;
 import sn.edu.ept.postgram.contentservice.entity.Comment;
 import sn.edu.ept.postgram.contentservice.entity.Post;
 import sn.edu.ept.postgram.contentservice.repository.CommentRepository;
@@ -15,71 +15,69 @@ import sn.edu.ept.postgram.contentservice.repository.PostRepository;
 import sn.edu.ept.postgram.shared.events.CommentAddedEvent;
 import sn.edu.ept.postgram.shared.events.KafkaTopics;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final EventPublisher eventPublisher;
 
-    @Transactional
-    public CommentResponseDto addComment(UUID postId, CommentRequestDto requestDto) {
+    public CommentResponse addComment(UUID authorId, String authorUsername,
+                                      UUID postId, CreateCommentRequest request) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
         Comment comment = Comment.builder()
-                .post(post)
-                .authorId(CurrentUserClaims.userId())
-                .authorUsername(CurrentUserClaims.username())
-                .content(requestDto.content())
+                .postId(postId)
+                .authorId(authorId)
+                .authorUsername(authorUsername)
+                .content(request.content())
                 .build();
 
-        Comment savedComment = commentRepository.save(comment);
+        commentRepository.save(comment);
 
-        CommentAddedEvent event = new CommentAddedEvent(
-                post.getAuthorId(),
-                savedComment.getAuthorId(),
-                savedComment.getAuthorUsername(),
-                postId
+        // incrémenter le compteur
+        post.setCommentsCount(post.getCommentsCount() + 1);
+        postRepository.save(post);
+
+        eventPublisher.publish(
+                KafkaTopics.COMMENT_ADDED,
+                comment.getId().toString(),
+                new CommentAddedEvent(
+                        comment.getId(),
+                        post.getAuthorId(),
+                        authorId,
+                        authorUsername,
+                        postId
+                )
         );
 
-        eventPublisher.publish(KafkaTopics.COMMENT_ADDED, postId.toString(), event);
-
-        return mapToResponseDto(savedComment);
+        return CommentResponse.from(comment);
     }
 
-    public List<CommentResponseDto> getCommentsByPost(UUID postId) {
-        return commentRepository.findByPostIdOrderByCreatedAtDesc(postId).stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<CommentResponse> getComments(UUID postId, Pageable pageable) {
+        return commentRepository.findByPostIdOrderByCreatedAtDesc(postId, pageable)
+                .map(CommentResponse::from);
     }
 
-    @Transactional
-    public void deleteComment(UUID commentId) {
+    public void deleteComment(UUID commentId, UUID authorId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        if (!comment.getAuthorId().equals(CurrentUserClaims.userId()) && 
-            !comment.getPost().getAuthorId().equals(CurrentUserClaims.userId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own comments or comments on your own posts");
+        if (!comment.getAuthorId().equals(authorId)) {
+            throw new RuntimeException("Forbidden");
         }
 
         commentRepository.delete(comment);
-    }
 
-    private CommentResponseDto mapToResponseDto(Comment comment) {
-        return new CommentResponseDto(
-                comment.getId(),
-                comment.getPost().getId(),
-                comment.getAuthorId(),
-                comment.getAuthorUsername(),
-                comment.getContent(),
-                comment.getCreatedAt()
-        );
+        Post post = postRepository.findById(comment.getPostId())
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setCommentsCount(Math.max(0, post.getCommentsCount() - 1));
+        postRepository.save(post);
     }
 }

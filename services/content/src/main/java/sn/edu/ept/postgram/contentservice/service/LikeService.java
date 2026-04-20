@@ -1,10 +1,8 @@
 package sn.edu.ept.postgram.contentservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import sn.edu.ept.postgram.contentservice.config.EventPublisher;
 import sn.edu.ept.postgram.contentservice.entity.Like;
 import sn.edu.ept.postgram.contentservice.entity.Post;
@@ -12,50 +10,65 @@ import sn.edu.ept.postgram.contentservice.repository.LikeRepository;
 import sn.edu.ept.postgram.contentservice.repository.PostRepository;
 import sn.edu.ept.postgram.shared.events.KafkaTopics;
 import sn.edu.ept.postgram.shared.events.PostLikedEvent;
+import sn.edu.ept.postgram.shared.events.PostUnlikedEvent;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LikeService {
 
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final EventPublisher eventPublisher;
 
-    @Transactional
-    public void likePost(UUID postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-
-        UUID userId = CurrentUserClaims.userId();
-
-        if (likeRepository.existsByPostIdAndAuthorId(postId, userId)) {
-            return; // Already liked
+    public void like(UUID userId, String username, UUID postId) {
+        if (likeRepository.existsByPostIdAndUserId(postId, userId)) {
+            throw new RuntimeException("Already liked");
         }
 
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
         Like like = Like.builder()
-                .post(post)
-                .authorId(userId)
-                .authorUsername(CurrentUserClaims.username())
+                .postId(postId)
+                .userId(userId)
+                .username(username)
                 .build();
 
         likeRepository.save(like);
 
-        PostLikedEvent event = new PostLikedEvent(
-                post.getAuthorId(),
-                userId,
-                CurrentUserClaims.username(),
-                postId
-        );
+        post.setLikesCount(post.getLikesCount() + 1);
+        postRepository.save(post);
 
-        eventPublisher.publish(KafkaTopics.POST_LIKED, postId.toString(), event);
+        eventPublisher.publish(
+                KafkaTopics.POST_LIKED,
+                postId.toString(),
+                new PostLikedEvent(post.getAuthorId(), userId, username, postId)
+        );
     }
 
-    @Transactional
-    public void unlikePost(UUID postId) {
-        UUID userId = CurrentUserClaims.userId();
-        likeRepository.findByPostIdAndAuthorId(postId, userId)
-                .ifPresent(likeRepository::delete);
+    public void unlike(UUID userId, UUID postId) {
+        if (!likeRepository.existsByPostIdAndUserId(postId, userId)) {
+            throw new RuntimeException("Not liked");
+        }
+
+        likeRepository.deleteByPostIdAndUserId(postId, userId);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setLikesCount(Math.max(0, post.getLikesCount() - 1));
+        postRepository.save(post);
+
+        eventPublisher.publish(
+                KafkaTopics.POST_UNLIKED,
+                postId.toString(),
+                new PostUnlikedEvent(postId, userId)
+        );
+    }
+
+    public boolean isLiked(UUID userId, UUID postId) {
+        return likeRepository.existsByPostIdAndUserId(postId, userId);
     }
 }

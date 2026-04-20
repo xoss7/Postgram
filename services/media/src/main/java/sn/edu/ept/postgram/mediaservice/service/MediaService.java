@@ -16,6 +16,7 @@ import sn.edu.ept.postgram.mediaservice.model.MediaType;
 import sn.edu.ept.postgram.mediaservice.repository.MediaRepository;
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -66,7 +67,7 @@ public class MediaService {
         }
     }
 
-    public UUID uploadAvatar(UUID uploaderId, MultipartFile file) {
+    public Map<String, Object> uploadAvatar(UUID uploaderId, MultipartFile file) {
         validateImage(file);
 
         // delete former avater if exists
@@ -78,7 +79,7 @@ public class MediaService {
         return upload(uploaderId, file, MediaType.AVATAR, avatarsBucket);
     }
 
-    public UUID uploadPostMedia(UUID uploaderId, MultipartFile file) {
+    public Map<String, Object> uploadPostMedia(UUID uploaderId, MultipartFile file) {
         validateMedia(file);
         return upload(uploaderId, file, detectMediaType(file), postsBucket);
     }
@@ -95,7 +96,7 @@ public class MediaService {
         mediaRepository.delete(media);
     }
 
-    private UUID upload(UUID uploaderId, MultipartFile file,
+    private Map<String, Object> upload(UUID uploaderId, MultipartFile file,
                                           MediaType mediaType, String bucket) {
         String filename = generateFilename(uploaderId, file);
 
@@ -121,7 +122,7 @@ public class MediaService {
                 .size(file.getSize())
                 .build();
         mediaRepository.save(media);
-        return media.getId();
+        return Map.of("mediaId", media.getId(), "mediaType", media.getType());
     }
 
     private void deleteFromMinio(String bucket, String filename) {

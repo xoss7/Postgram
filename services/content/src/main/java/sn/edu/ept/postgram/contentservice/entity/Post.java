@@ -2,8 +2,10 @@ package sn.edu.ept.postgram.contentservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import sn.edu.ept.postgram.contentservice.model.Visibility;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,38 +19,46 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(name = "author_id", nullable = false)
     private UUID authorId;
-
-    @Column(nullable = false)
-    private String authorUsername;
 
     @Column(columnDefinition = "TEXT")
     private String content;
-
-    private String mediaUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Visibility visibility;
 
-    @CreationTimestamp
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    @Builder.Default
+    private List<PostMedia> mediaFiles = new ArrayList<>();
+
+    @Column(name = "likes_count", nullable = false)
+    @Builder.Default
+    private int likesCount = 0;
+
+    @Column(name = "comments_count", nullable = false)
+    @Builder.Default
+    private int commentsCount = 0;
+
+    @CreatedDate
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Comment> comments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Like> likes = new ArrayList<>();
+    public void addMedia(PostMedia media) {
+        media.setPost(this);
+        this.mediaFiles.add(media);
+    }
 }
