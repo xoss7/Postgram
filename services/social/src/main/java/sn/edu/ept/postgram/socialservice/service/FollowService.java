@@ -14,6 +14,7 @@ import sn.edu.ept.postgram.socialservice.kafka.EventPublisher;
 import sn.edu.ept.postgram.socialservice.repository.FollowRepository;
 import sn.edu.ept.postgram.socialservice.repository.ProfileRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -65,6 +66,16 @@ public class FollowService {
                 followerId.toString(),
                 new UserUnfollowedEvent(followerId, followeeId)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<UUID> getFollowerIds(UUID userId) {
+        return followRepository.findFollowerIdsByFolloweeId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UUID> getFolloweeIds(UUID userId) {
+        return followRepository.findFolloweeIdsByFollowerId(userId);
     }
 
     @Transactional(readOnly = true)
