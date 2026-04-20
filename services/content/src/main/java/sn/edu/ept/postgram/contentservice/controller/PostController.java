@@ -47,6 +47,13 @@ public class PostController {
         );
     }
 
+    @GetMapping("/user/{userId}/recent")
+    public ResponseEntity<List<PostResponse>> getRecentPosts(
+            @PathVariable UUID userId,
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(postService.getRecentPosts(userId, limit));
+    }
+
     @GetMapping("/batch")
     public ResponseEntity<List<PostResponse>> getPostsByIds(
             @RequestParam List<UUID> ids) {
