@@ -3,6 +3,7 @@ package sn.edu.ept.postgram.contentservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -88,6 +89,15 @@ public class PostService {
     public Page<PostResponse> getUserPosts(UUID authorId, Pageable pageable) {
         return postRepository.findByAuthorIdOrderByCreatedAtDesc(authorId, pageable)
                 .map(p -> PostResponse.from(p, mediaUrlResolver));
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponse> getRecentPosts(UUID authorId, int limit) {
+        return postRepository
+                .findTopByAuthorIdOrderByCreatedAtDesc(authorId, PageRequest.of(0, limit))
+                .stream()
+                .map(p -> PostResponse.from(p, mediaUrlResolver))
+                .toList();
     }
 
     @Transactional(readOnly = true)
