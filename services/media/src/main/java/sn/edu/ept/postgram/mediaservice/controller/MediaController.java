@@ -23,7 +23,7 @@ public class MediaController {
     private final MediaService mediaService;
 
     @PostMapping("/avatar")
-    public ResponseEntity<Map<String, UUID>> uploadAvatar(
+    public ResponseEntity<Map<String, Object>> uploadAvatar(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal Jwt jwt) {
 
@@ -31,18 +31,18 @@ public class MediaController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(Map.of("mediaId", mediaService.uploadAvatar(userId, file)));
+                .body(mediaService.uploadAvatar(userId, file));
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<Map<String, UUID>> uploadPostMedia(
+    public ResponseEntity<Map<String, Object>> uploadPostMedia(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal Jwt jwt) {
 
         UUID userId = UUID.fromString(jwt.getClaim("user_id").toString());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(Map.of("mediaId", mediaService.uploadPostMedia(userId, file)));
+                .body(mediaService.uploadPostMedia(userId, file));
     }
 
     @GetMapping("/{mediaId}")
