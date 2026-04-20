@@ -17,4 +17,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Query("SELECT p FROM Post p WHERE p.id IN :ids")
     List<Post> findAllByIds(List<UUID> ids);
+
+    Page<Post> findTopByAuthorIdOrderByCreatedAtDesc(UUID authorId, Pageable pageable);
 }

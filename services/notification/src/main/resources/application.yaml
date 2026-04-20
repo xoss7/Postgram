@@ -26,7 +26,6 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
       properties:
         spring.json.trusted.packages: "sn.edu.ept.postgram.shared.events"
-        spring.json.use.type.headers: false
 
 
 
