@@ -29,6 +29,7 @@ spring:
 feed:
   max-size: 500           # nombre max de posts dans un feed Redis
   default-page-size: 20
+  backfill-limit: 20
 
 services:
   social-service: http://localhost:8083

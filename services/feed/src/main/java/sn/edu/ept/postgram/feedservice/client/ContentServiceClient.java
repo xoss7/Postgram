@@ -2,6 +2,7 @@ package sn.edu.ept.postgram.feedservice.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import sn.edu.ept.postgram.feedservice.dto.PostResponse;
 
@@ -13,4 +14,10 @@ public interface ContentServiceClient {
 
     @GetMapping("/posts/batch")
     List<PostResponse> getPostsByIds(@RequestParam List<UUID> ids);
+
+    @GetMapping("/posts/user/{userId}/recent")
+    List<PostResponse> getRecentPosts(
+            @PathVariable UUID userId,
+            @RequestParam(defaultValue = "20") int limit
+    );
 }
