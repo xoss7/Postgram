@@ -1,43 +1,7 @@
 spring:
   application:
-    name: auth
+    name: auth-service
   profiles:
-    active: dev
-
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      retries: 3
-      acks: all
-      properties:
-        enable.idempotence: true
-        spring.json.add.type.headers: true
-  jpa:
-    hibernate:
-      ddl-auto: update
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:sql/oauth2-schema.sql
-
-  datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-
-server:
-  port: 8081
-
-app:
-  oauth2:
-    redirect-uri:
-      web: ${WEB_OIDC_REDIRECT_URI}
-      mobile: ${MOBILE_OIDC_REDIRECT_URI}
-  security:
-    admin:
-      username: ${ADMIN_USERNAME}
-      password: ${ADMIN_PASSWORD}
-      email: ${ADMIN_EMAIL}
+    default: dev
+  config:
+    import: optional:configserver:http://localhost:8888
