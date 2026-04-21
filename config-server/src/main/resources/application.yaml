@@ -1,0 +1,15 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/xoss7/postgram-config-svc
+          default-label: main
+          clone-on-start: true
+          force-pull: true
+          search-paths: .

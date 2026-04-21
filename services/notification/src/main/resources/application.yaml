@@ -1,38 +1,7 @@
 spring:
   application:
     name: notification-service
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8081
-
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-
-  kafka:
-    bootstrap-servers: ${KAFKA_SERVERS}
-    consumer:
-      group-id: notification-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "sn.edu.ept.postgram.shared.events"
-
-
-
-server:
-  port: 8085
-
-eureka:
-  client:
-    service-url:
-      default-zone: http://${EUREKA_SERVER}:${EUREKA_PORT}/eureka/
+  profiles:
+    default: dev
+  config:
+    import: optional:configserver:http://localhost:8888

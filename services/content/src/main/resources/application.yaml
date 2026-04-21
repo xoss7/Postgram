@@ -1,33 +1,7 @@
-server:
-  port: 8082
-
 spring:
   application:
     name: content-service
   profiles:
-    active: dev
-  datasource:
-    url: ${DB_URL}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: create
-  kafka:
-    bootstrap-servers: ${KAFKA_CLUSTER}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${AUTH_SERVICE}
-
-media:
-  path: ${MEDIA_PATH}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://${EUREKA_SERVER}:${EUREKA_PORT}/eureka/
+    default: dev
+  config:
+    import: optional:configserver:http://localhost:8888
